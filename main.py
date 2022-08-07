@@ -2,7 +2,7 @@ import discord
 import os
 
 client = discord.Client()
-
+TOKEN = os.environ['TOKEN']
 
 @client.event
 async def on_ready():
@@ -17,4 +17,4 @@ async def on_message(message):
         await message.channel.send("Hello")
 
 
-client.run(os.getenv("TOKEN"))
+client.run(TOKEN)
