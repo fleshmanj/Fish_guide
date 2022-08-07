@@ -1,28 +1,48 @@
 import time
+import json
+import ast
+import datetime
 
 import requests
 from bs4 import BeautifulSoup
-
-url = "https://www.latlong.net/"
-
-response = requests.get(url)
-
-soup = BeautifulSoup(response.content)
+from Constants import NAVARRE
 
 
-form = soup.find("form")
-print(form)
-token_value = form.find_all("input")[0]["value"]
-print(token_value)
-time.sleep(1)
+def get_forcast():
+    lat, long = NAVARRE
 
-payload = {"lltoken": token_value,
-           "llcd" : "0",
-           "name": "Crestview, FL",
-            }
+    url = f"https://api.weather.gov/points/{lat},{long}"
 
-result = requests.post(url, data=payload)
-print(result)
+    response = requests.get(url)
 
-new_result = BeautifulSoup(result.content)
-print(new_result.prettify())
+    byte_str = response.content
+
+    dict_str = byte_str.decode("UTF-8")
+    my_data = ast.literal_eval(dict_str)
+
+    forcast_url = my_data["properties"]["forecast"]
+
+    forecast = requests.get(forcast_url)
+    data = forecast.json()
+    return data
+
+
+days = {"Monday": 0, "Tuesday": 1, "Wednesday": 2, "Thursday": 3, "Friday": 4, "Saturday": 5, "Sunday": 6}
+
+now = datetime.datetime.now()
+day_of_the_week = datetime.datetime.today().weekday()
+
+
+day = None
+
+if __name__ == "__main__":
+
+    data = get_forcast()
+
+    for value in data["properties"]["periods"]:
+        if type(value) == dict:
+            if value["name"] is not None:
+                day = value["name"]
+            if day == "This Morning" or day == "This Afternoon" or day == "Tonight" or day == "Today":
+                for vkey, vvalue in value.items():
+                    print(vkey, vvalue)
