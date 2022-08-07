@@ -1,8 +1,8 @@
 import discord
-import os
+from Constants import TOKEN
+from web_scrape import get_forecast
 
 client = discord.Client()
-TOKEN = os.environ['TOKEN']
 
 @client.event
 async def on_ready():
@@ -15,6 +15,9 @@ async def on_message(message):
         return
     if message.content.startswith("$hello"):
         await message.channel.send("Hello")
+    if message.content.startswith("$forecast"):
+      data = get_forecast()             
+      await message.channel.send(data)
 
 
 client.run(TOKEN)
